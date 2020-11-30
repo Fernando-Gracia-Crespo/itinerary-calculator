@@ -31,7 +31,11 @@ FRAMEWORK/LIBRARIES USED
 ========================
 
 Spring Boot: Java Framework to create fast and easy ejecutable Java applications, is very useful to create from scratch a RESTful service.
+
 Spring JPA: Used to access the database with no need of sql queries.
+
 H2 database: Memory-stored database. It is not a good option for a production environment, but fits perfectly the requeriments I needed for this application
+
 Springfox Swagger UI: Library that auto-generates the swagger UI using a few annotations
+
 JUnit and Mockito: Used to execute unit tests emulating the behavior of external elements of the class we want to test
