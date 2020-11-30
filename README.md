@@ -14,7 +14,7 @@ docker build -t itinerary-api .
 docker run -p 8080:8080 --net itinerary-network --name itinerary-api itinerary-api
 
 
-3.- To use fgracia-itinerary-api swagger can be found in
+3.- To use fgracia-itinerary-api, swagger can be found in
 
 http://localhost:8080/swagger-ui/
 
@@ -26,7 +26,7 @@ docker build -t itinerary-calculator .
 
 docker run -p 8081:8081 --net itinerary-network --name itinerary-calculator itinerary-calculator
 
-5.- To use fgracia-itinerary-calculator swagger can be found in
+5.- To use fgracia-itinerary-calculator, swagger can be found in
 
 http://localhost:8081/swagger-ui/
 
