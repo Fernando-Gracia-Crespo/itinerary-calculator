@@ -8,7 +8,9 @@ docket network create itinerary-network
 2.- Build and run project fgracia-itinerary-api, by going to the project base directory and executing the following commands
 
 mvn clean package
+
 docker build -t itinerary-api .
+
 docker run -p 8080:8080 --net itinerary-network --name itinerary-api itinerary-api
 
 
@@ -19,7 +21,9 @@ http://localhost:8080/swagger-ui/
 4.- Build and run project fgracia-itinerary-calculator, by going to the project base directory and executing the following commands
 
 mvn clean package
+
 docker build -t itinerary-calculator .
+
 docker run -p 8081:8081 --net itinerary-network --name itinerary-calculator itinerary-calculator
 
 5.- To use fgracia-itinerary-calculator swagger can be found in
