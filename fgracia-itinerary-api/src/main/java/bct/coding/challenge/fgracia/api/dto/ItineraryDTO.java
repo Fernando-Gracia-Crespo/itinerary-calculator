@@ -3,8 +3,8 @@ package bct.coding.challenge.fgracia.api.dto;
 public class ItineraryDTO {
 	
 	private Integer id;
-	private String originCity;
-	private String destinyCity;
+	private CityDTO originCity;
+	private CityDTO destinyCity;
 	private String departureTime;
 	private String arrivalTime;
 	
@@ -14,16 +14,16 @@ public class ItineraryDTO {
 	public void setId(Integer id) {
 		this.id = id;
 	}
-	public String getOriginCity() {
+	public CityDTO getOriginCity() {
 		return originCity;
 	}
-	public void setOriginCity(String originCity) {
+	public void setOriginCity(CityDTO originCity) {
 		this.originCity = originCity;
 	}
-	public String getDestinyCity() {
+	public CityDTO getDestinyCity() {
 		return destinyCity;
 	}
-	public void setDestinyCity(String destinyCity) {
+	public void setDestinyCity(CityDTO destinyCity) {
 		this.destinyCity = destinyCity;
 	}
 	public String getDepartureTime() {

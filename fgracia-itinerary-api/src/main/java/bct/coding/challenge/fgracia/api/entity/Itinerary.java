@@ -6,6 +6,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -18,11 +20,19 @@ public class Itinerary implements Serializable{
 	@GeneratedValue
 	private Integer id;
 	
-	@Column(name="origin_city")
+	@ManyToOne
+	@JoinColumn(name = "origin_city")
+	private City originCity;
+	
+	@ManyToOne
+	@JoinColumn(name = "destiny_city")
+	private City destinyCity;
+	
+	/*@Column(name="origin_city")
 	private String originCity;
 	
 	@Column(name="destiny_city")
-	private String destinyCity;
+	private String destinyCity;*/
 	
 	@Column(name="departure_time")
 	private String departureTime;
@@ -38,7 +48,7 @@ public class Itinerary implements Serializable{
 		this.id = id;
 	}
 
-	public String getOriginCity() {
+	/*public String getOriginCity() {
 		return originCity;
 	}
 
@@ -51,6 +61,22 @@ public class Itinerary implements Serializable{
 	}
 
 	public void setDestinyCity(String destinyCity) {
+		this.destinyCity = destinyCity;
+	}*/
+	
+	public City getOriginCity() {
+		return originCity;
+	}
+
+	public void setOriginCity(City originCity) {
+		this.originCity = originCity;
+	}
+
+	public City getDestinyCity() {
+		return destinyCity;
+	}
+
+	public void setDestinyCity(City destinyCity) {
 		this.destinyCity = destinyCity;
 	}
 
