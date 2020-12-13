@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import bct.coding.challenge.fgracia.calculator.dto.ItineraryDTO;
-import bct.coding.challenge.fgracia.calculator.exceptions.APIAccessException;
-import bct.coding.challenge.fgracia.calculator.exceptions.NoValidCityException;
-import bct.coding.challenge.fgracia.calculator.exceptions.NoValidTimeException;
+import bct.coding.challenge.fgracia.calculator.exception.APIAccessException;
+import bct.coding.challenge.fgracia.calculator.exception.NoValidCityException;
+import bct.coding.challenge.fgracia.calculator.exception.NoValidTimeException;
 import bct.coding.challenge.fgracia.calculator.repository.ItineraryRepository;
 
 @Service

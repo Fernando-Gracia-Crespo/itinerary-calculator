@@ -1,4 +1,4 @@
-package bct.coding.challenge.fgracia.calculator.exceptions;
+package bct.coding.challenge.fgracia.calculator.exception;
 
 public class NoValidCityException extends Exception {
 

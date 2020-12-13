@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import bct.coding.challenge.fgracia.calculator.dto.ItineraryDTO;
-import bct.coding.challenge.fgracia.calculator.exceptions.APIAccessException;
+import bct.coding.challenge.fgracia.calculator.exception.APIAccessException;
 
 @Component
 public class ItineraryRepository {
