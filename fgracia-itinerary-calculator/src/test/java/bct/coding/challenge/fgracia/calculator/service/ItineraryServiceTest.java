@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import bct.coding.challenge.fgracia.calculator.auth.Credentials;
 import bct.coding.challenge.fgracia.calculator.dto.CityDTO;
 import bct.coding.challenge.fgracia.calculator.dto.ItineraryDTO;
+import bct.coding.challenge.fgracia.calculator.repository.CityRepository;
 import bct.coding.challenge.fgracia.calculator.repository.ItineraryRepository;
 import bct.coding.challenge.fgracia.calculator.service.ItineraryService.CalculateMode;
 
@@ -31,12 +32,17 @@ public class ItineraryServiceTest {
 	@Mock
 	private LoginService loginService;
 	
+	@Mock
+	private CityRepository cityRepository;
+	
 	@InjectMocks
 	private ItineraryService itineraryService;
 	
 	@org.junit.jupiter.api.Test
 	public void tst() throws Exception {
 		assertNotNull(itineraryRepository);
+		assertNotNull(loginService);
+		assertNotNull(cityRepository);
 		when(itineraryRepository.getItinerariesFrom(any(Credentials.class),anyInt())).then(new Answer<ItineraryDTO[]>() {
 			@Override
 			public ItineraryDTO[] answer(InvocationOnMock invocation) throws Throwable {
@@ -44,9 +50,10 @@ public class ItineraryServiceTest {
 				return getItinerariesFrom(city);
 			}
 		});
-		assertNotNull(loginService);
 		when(loginService.getUserToken(anyString(), anyString())).thenReturn(new Credentials());
 		when(loginService.getUserToken(isNull(), isNull())).thenReturn(new Credentials());
+		when(cityRepository.cityExists(any(Credentials.class), anyInt())).thenReturn(true);
+		when(cityRepository.cityExists(any(Credentials.class), isNull())).thenReturn(false);
 		List<ItineraryDTO> dtos = itineraryService.getShorterRoute(1,8, CalculateMode.CONNECTIONS);
 		assertNotNull(dtos);
 		assertTrue(dtos.size()==2);

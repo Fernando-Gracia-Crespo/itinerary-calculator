@@ -1,5 +1,6 @@
 package bct.coding.challenge.fgracia.calculator.service;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -12,8 +13,10 @@ import org.springframework.stereotype.Service;
 import bct.coding.challenge.fgracia.calculator.auth.Credentials;
 import bct.coding.challenge.fgracia.calculator.dto.ItineraryDTO;
 import bct.coding.challenge.fgracia.calculator.exception.APIAccessException;
+import bct.coding.challenge.fgracia.calculator.exception.NoReachableCityException;
 import bct.coding.challenge.fgracia.calculator.exception.NoValidCityException;
 import bct.coding.challenge.fgracia.calculator.exception.NoValidTimeException;
+import bct.coding.challenge.fgracia.calculator.repository.CityRepository;
 import bct.coding.challenge.fgracia.calculator.repository.ItineraryRepository;
 
 @Service
@@ -25,6 +28,9 @@ public class ItineraryService {
 	private ItineraryRepository itineraryRepository;
 	
 	@Autowired
+	private CityRepository cityRepository;
+	
+	@Autowired
 	public LoginService loginService;
 	
 	@Value("${itinerary.api.user}")
@@ -33,8 +39,14 @@ public class ItineraryService {
 	@Value("${itinerary.api.pass}")
 	private String apiPass;
 	
-	public List<ItineraryDTO> getShorterRoute(Integer from, Integer to, CalculateMode mode) throws APIAccessException, NoValidCityException, NoValidTimeException{
+	public List<ItineraryDTO> getShorterRoute(Integer from, Integer to, CalculateMode mode) throws APIAccessException, NoValidCityException, NoValidTimeException, NoReachableCityException{
 		Credentials credentials = loginService.getUserToken(apiUser, apiPass);
+		if(!cityRepository.cityExists(credentials, from)) {
+			throw new NoValidCityException("City Id not valid: "+from);
+		}
+		if(!cityRepository.cityExists(credentials, to)) {
+			throw new NoValidCityException("City Id not valid: "+to);
+		}
 		// We store the shortest found. If we detect the path we are going is already bigger (in terms of connections or time) we stop looking in this path. Initial value is MAX_VALUE to represent we did not found one yet
 		int shortest = Integer.MAX_VALUE;
 		// We store the cities already visited in the current path so we avoid loops. the cities are stored in the following pattern ##city1##city2##city3##
@@ -42,7 +54,7 @@ public class ItineraryService {
 		// Initial size is 0 as we have not yet process any itinerary
 		Path shortestPath = getParcialShorterRoute(credentials, from, to, visited, 0, shortest, mode);
 		if(shortestPath==null || shortestPath.dtos == null || shortestPath.dtos.isEmpty()) {
-			throw new NoValidCityException("City error. Either one city is non existant or the origin and destination cities are not conected");
+			throw new NoReachableCityException("The origin and destination cities are not conected");
 		}
 		return shortestPath.dtos;
 	}
@@ -119,8 +131,8 @@ public class ItineraryService {
 			Date arrival = sdf.parse(itinerary.getArrivalTime());
 			long lengthInMillis = arrival.getTime() - departure.getTime();
 			return (int) (lengthInMillis/1000l);
-		}catch(Exception e){
-			throw new NoValidTimeException("There is an invalid time value",e);
+		}catch(ParseException e){
+			throw new NoValidTimeException(itinerary);
 		}
 	}
 	

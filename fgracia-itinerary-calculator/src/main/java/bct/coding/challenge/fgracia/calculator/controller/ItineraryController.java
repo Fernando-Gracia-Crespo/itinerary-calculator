@@ -1,10 +1,13 @@
 package bct.coding.challenge.fgracia.calculator.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import bct.coding.challenge.fgracia.calculator.dto.ItineraryDTO;
 import bct.coding.challenge.fgracia.calculator.service.ItineraryService;
 import bct.coding.challenge.fgracia.calculator.service.ItineraryService.CalculateMode;
 import io.swagger.annotations.Api;
@@ -20,7 +23,7 @@ public class ItineraryController {
 	
 	@ApiOperation(value = "Method that returns the shortest path between two cities in terms of number of connections")
 	@GetMapping("/itinerary-calculator/{origin}/{destiny}/shorter-in-connections")
-	public Object calculateShortInConnections(
+	public List<ItineraryDTO> calculateShortInConnections(
 			@ApiParam(name="origin", value = "City of origin", type = "integer") @PathVariable Integer origin,
 			@ApiParam(name="destiny", value = "City of destination", type = "integer") @PathVariable Integer destiny) throws Exception{
 		return itineraryService.getShorterRoute(origin, destiny, CalculateMode.CONNECTIONS);

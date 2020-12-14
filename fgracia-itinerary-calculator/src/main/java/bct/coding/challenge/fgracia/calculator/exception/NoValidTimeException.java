@@ -1,28 +1,20 @@
 package bct.coding.challenge.fgracia.calculator.exception;
 
+import bct.coding.challenge.fgracia.calculator.dto.ItineraryDTO;
+
 public class NoValidTimeException extends Exception {
 
 	private static final long serialVersionUID = 1L;
+	
+	ItineraryDTO itineraryDTO;
 
-	public NoValidTimeException() {
+	public NoValidTimeException(ItineraryDTO itineraryDTO) {
 		super();
-	}
-
-	public NoValidTimeException(String message, Throwable cause, boolean enableSuppression,
-			boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
-
-	public NoValidTimeException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
-	public NoValidTimeException(String message) {
-		super(message);
-	}
-
-	public NoValidTimeException(Throwable cause) {
-		super(cause);
+		this.itineraryDTO = itineraryDTO;
 	}
 	
+	
+	public ItineraryDTO getItineraryDTO() {
+		return itineraryDTO;
+	}
 }
