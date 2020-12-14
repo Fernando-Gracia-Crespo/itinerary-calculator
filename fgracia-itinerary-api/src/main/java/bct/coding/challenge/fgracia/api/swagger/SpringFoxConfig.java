@@ -30,7 +30,7 @@ public class SpringFoxConfig {
 				.select()
 				.apis( RequestHandlerSelectors.basePackage("bct.coding.challenge.fgracia.api"))
 				.paths(PathSelectors.any())
-				.build();  
+				.build();
 	}
 	
 	

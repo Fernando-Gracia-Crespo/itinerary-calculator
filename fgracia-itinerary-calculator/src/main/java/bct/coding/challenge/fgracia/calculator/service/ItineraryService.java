@@ -6,8 +6,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import bct.coding.challenge.fgracia.calculator.auth.Credentials;
 import bct.coding.challenge.fgracia.calculator.dto.ItineraryDTO;
 import bct.coding.challenge.fgracia.calculator.exception.APIAccessException;
 import bct.coding.challenge.fgracia.calculator.exception.NoValidCityException;
@@ -22,28 +24,38 @@ public class ItineraryService {
 	@Autowired
 	private ItineraryRepository itineraryRepository;
 	
-	public List<ItineraryDTO> getShorterRoute(String from, String to, CalculateMode mode) throws APIAccessException, NoValidCityException, NoValidTimeException{
+	@Autowired
+	public LoginService loginService;
+	
+	@Value("${itinerary.api.user}")
+	private String apiUser;
+
+	@Value("${itinerary.api.pass}")
+	private String apiPass;
+	
+	public List<ItineraryDTO> getShorterRoute(Integer from, Integer to, CalculateMode mode) throws APIAccessException, NoValidCityException, NoValidTimeException{
+		Credentials credentials = loginService.getUserToken(apiUser, apiPass);
 		// We store the shortest found. If we detect the path we are going is already bigger (in terms of connections or time) we stop looking in this path. Initial value is MAX_VALUE to represent we did not found one yet
 		int shortest = Integer.MAX_VALUE;
 		// We store the cities already visited in the current path so we avoid loops. the cities are stored in the following pattern ##city1##city2##city3##
 		String visited = "##" + from + "##";
 		// Initial size is 0 as we have not yet process any itinerary
-		Path shortestPath = getParcialShorterRoute(from, to, visited, 0, shortest, mode);
+		Path shortestPath = getParcialShorterRoute(credentials, from, to, visited, 0, shortest, mode);
 		if(shortestPath==null || shortestPath.dtos == null || shortestPath.dtos.isEmpty()) {
 			throw new NoValidCityException("City error. Either one city is non existant or the origin and destination cities are not conected");
 		}
 		return shortestPath.dtos;
 	}
 	
-	private Path getParcialShorterRoute(String from, String to, String visited, int currentSize, int shortestFound, CalculateMode mode) throws APIAccessException, NoValidCityException, NoValidTimeException{
-		ItineraryDTO[] itineraries = itineraryRepository.getItinerariesFrom(from);
+	private Path getParcialShorterRoute(Credentials credentials, Integer from, Integer to, String visited, int currentSize, int shortestFound, CalculateMode mode) throws APIAccessException, NoValidCityException, NoValidTimeException{
+		ItineraryDTO[] itineraries = itineraryRepository.getItinerariesFrom(credentials, from);
 		Path shortestFromHere = null;
 		int shortestFoundIncludingThisBranch = shortestFound;
 		for(ItineraryDTO itinerary:itineraries) {
 			// We get the size of this particular itinerary
 			int destSize = getSize(itinerary, mode);
 			// We check if we have arrived to the destination
-			if(itinerary.getDestinyCity().equalsIgnoreCase(to)) {
+			if(itinerary.getDestinyCity().getId() == to) {
 				// we found the destination, we check if this path is the shortest found yet
 				int size = currentSize + destSize;
 				// We only consider this path if it is not bigger than the shortest found yet
@@ -60,13 +72,13 @@ public class ItineraryService {
 						shortestFoundIncludingThisBranch = size;
 					}
 				}
-			} else if(!visited.contains("##"+itinerary.getDestinyCity()+"##")) {
+			} else if(!visited.contains("##"+itinerary.getDestinyCity().getId()+"##")) {
 				// we have not yet visited this city on this path, no loop has been made, we get the shortest path from here
-				String newVisited = visited + itinerary.getDestinyCity() + "##";
+				String newVisited = visited + itinerary.getDestinyCity().getId() + "##";
 				int newCurrentSize = currentSize + destSize;
 				// We check if we are still under the size of the shortest path found to this point  
 				if(newCurrentSize<shortestFound) {
-					Path shortestFromDestination = getParcialShorterRoute(itinerary.getDestinyCity(), to, newVisited, newCurrentSize, shortestFoundIncludingThisBranch, mode);
+					Path shortestFromDestination = getParcialShorterRoute(credentials, itinerary.getDestinyCity().getId(), to, newVisited, newCurrentSize, shortestFoundIncludingThisBranch, mode);
 					// If shortestFromDestination == null it means the paths from here does not include the shortest found yet or the destination city is unreachable
 					if(shortestFromDestination!=null) {
 						// We have found the shortest found yet, we add this destination at the start of the list

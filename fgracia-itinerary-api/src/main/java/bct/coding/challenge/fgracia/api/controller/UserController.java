@@ -17,7 +17,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @RestController
 public class UserController {
 
-	@PostMapping("user")
+	@PostMapping("api/user")
 	public String login(@RequestParam("user") String username, @RequestParam("password") String pwd) throws Exception {
 		// We have two users, test/test and admin/1234, otherwise we return bad credentials
 		if(("test".equals(username) && "test".equals(pwd)) || ("admin".equals(username) && "1234".equals(pwd))) {

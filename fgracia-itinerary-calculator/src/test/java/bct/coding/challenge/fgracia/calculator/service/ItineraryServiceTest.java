@@ -2,7 +2,10 @@ package bct.coding.challenge.fgracia.calculator.service;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -13,6 +16,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import bct.coding.challenge.fgracia.calculator.auth.Credentials;
+import bct.coding.challenge.fgracia.calculator.dto.CityDTO;
 import bct.coding.challenge.fgracia.calculator.dto.ItineraryDTO;
 import bct.coding.challenge.fgracia.calculator.repository.ItineraryRepository;
 import bct.coding.challenge.fgracia.calculator.service.ItineraryService.CalculateMode;
@@ -23,84 +28,100 @@ public class ItineraryServiceTest {
 	@Mock
 	private ItineraryRepository itineraryRepository;
 	
+	@Mock
+	private LoginService loginService;
+	
 	@InjectMocks
 	private ItineraryService itineraryService;
 	
 	@org.junit.jupiter.api.Test
 	public void tst() throws Exception {
 		assertNotNull(itineraryRepository);
-		when(itineraryRepository.getItinerariesFrom(anyString())).then(new Answer<ItineraryDTO[]>() {
+		when(itineraryRepository.getItinerariesFrom(any(Credentials.class),anyInt())).then(new Answer<ItineraryDTO[]>() {
 			@Override
 			public ItineraryDTO[] answer(InvocationOnMock invocation) throws Throwable {
-				String city = invocation.getArgument(0);
+				Integer city = invocation.getArgument(1);
 				return getItinerariesFrom(city);
 			}
 		});
-		List<ItineraryDTO> dtos = itineraryService.getShorterRoute("a","h", CalculateMode.CONNECTIONS);
+		assertNotNull(loginService);
+		when(loginService.getUserToken(anyString(), anyString())).thenReturn(new Credentials());
+		when(loginService.getUserToken(isNull(), isNull())).thenReturn(new Credentials());
+		List<ItineraryDTO> dtos = itineraryService.getShorterRoute(1,8, CalculateMode.CONNECTIONS);
 		assertNotNull(dtos);
 		assertTrue(dtos.size()==2);
-		assertTrue(dtos.get(0).getOriginCity().equals("a"));
-		assertTrue(dtos.get(1).getOriginCity().equals("g"));
-		assertTrue(dtos.get(1).getDestinyCity().equals("h"));
+		assertTrue(dtos.get(0).getOriginCity().getId() == 1);
+		assertTrue(dtos.get(1).getOriginCity().getId() == 7);
+		assertTrue(dtos.get(1).getDestinyCity().getId() == 8);
 	}
 	
-	private ItineraryDTO[] getItinerariesFrom(String from) {
-		if("a".equals(from)) {
-			ItineraryDTO[] dtos = new ItineraryDTO[4];
-			dtos[0] = getDTO("a","b");
-			dtos[1] = getDTO("a","d");
-			dtos[2] = getDTO("a","i");
-			dtos[3] = getDTO("a","g");
+	private ItineraryDTO[] getItinerariesFrom(Integer from) {
+		ItineraryDTO[] dtos;
+		switch(from.intValue()) {
+		case 1:
+			dtos = new ItineraryDTO[4];
+			dtos[0] = getDTO(1,2);
+			dtos[1] = getDTO(1,4);
+			dtos[2] = getDTO(1,9);
+			dtos[3] = getDTO(1,7);
 			return dtos;
-		} else if("b".equals(from)) {
-			ItineraryDTO[] dtos = new ItineraryDTO[1];
-			dtos[0] = getDTO("b","c");
+		case 2:
+			dtos = new ItineraryDTO[2];
+			dtos[0] = getDTO(2,1);
+			dtos[1] = getDTO(2,3);
 			return dtos;
-		} else if("c".equals(from)) {
-			ItineraryDTO[] dtos = new ItineraryDTO[1];
-			dtos[0] = getDTO("c","f");
+		case 3:
+			dtos = new ItineraryDTO[1];
+			dtos[0] = getDTO(3,6);
 			return dtos;
-		} else if("f".equals(from)) {
-			ItineraryDTO[] dtos = new ItineraryDTO[1];
-			dtos[0] = getDTO("f","h");
+		case 4:
+			dtos = new ItineraryDTO[1];
+			dtos[0] = getDTO(4,5);
 			return dtos;
-		} else if("d".equals(from)) {
-			ItineraryDTO[] dtos = new ItineraryDTO[1];
-			dtos[0] = getDTO("d","e");
+		case 5:
+			dtos = new ItineraryDTO[2];
+			dtos[0] = getDTO(5,12);
+			dtos[1] = getDTO(5,8);
 			return dtos;
-		} else if("e".equals(from)) {
-			ItineraryDTO[] dtos = new ItineraryDTO[2];
-			dtos[0] = getDTO("e","l");
-			dtos[1] = getDTO("e","h");
+		case 6:
+			dtos = new ItineraryDTO[1];
+			dtos[0] = getDTO(6,8);
 			return dtos;
-		} else if("l".equals(from)) {
-			ItineraryDTO[] dtos = new ItineraryDTO[1];
-			dtos[0] = getDTO("l","h");
+		case 7:
+			dtos = new ItineraryDTO[1];
+			dtos[0] = getDTO(7,8);
 			return dtos;
-		} else if("i".equals(from)) {
-			ItineraryDTO[] dtos = new ItineraryDTO[1];
-			dtos[0] = getDTO("i","j");
+		case 9:
+			dtos = new ItineraryDTO[1];
+			dtos[0] = getDTO(9,10);
 			return dtos;
-		} else if("j".equals(from)) {
-			ItineraryDTO[] dtos = new ItineraryDTO[1];
-			dtos[0] = getDTO("j","k");
+		case 10:
+			dtos = new ItineraryDTO[1];
+			dtos[0] = getDTO(10,11);
 			return dtos;
-		} else if("k".equals(from)) {
-			ItineraryDTO[] dtos = new ItineraryDTO[1];
-			dtos[0] = getDTO("k","h");
+		case 11:
+			dtos = new ItineraryDTO[1];
+			dtos[0] = getDTO(11,8);
 			return dtos;
-		} else if("g".equals(from)) {
-			ItineraryDTO[] dtos = new ItineraryDTO[1];
-			dtos[0] = getDTO("g","h");
+		case 12:
+			dtos = new ItineraryDTO[1];
+			dtos[0] = getDTO(12,8);
 			return dtos;
+		default:
+			return new ItineraryDTO[0];
 		}
-		return new ItineraryDTO[0];
 	}
 	
-	private ItineraryDTO getDTO(String from,String to) {
+	private ItineraryDTO getDTO(Integer from,Integer to) {
 		ItineraryDTO dto = new ItineraryDTO();
-		dto.setOriginCity(from);
-		dto.setDestinyCity(to);
+		CityDTO origin = new CityDTO();
+		origin.setId(from);
+		origin.setName("Name of "+from);
+		dto.setOriginCity(origin);
+		CityDTO destiny = new CityDTO();
+		destiny.setId(to);
+		destiny.setName("Name of "+to);
+		dto.setDestinyCity(destiny);
 		dto.setDepartureTime("10:00:00");
 		dto.setArrivalTime("12:00:00");
 		return dto;

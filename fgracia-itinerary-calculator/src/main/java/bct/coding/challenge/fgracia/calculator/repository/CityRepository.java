@@ -10,25 +10,24 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import bct.coding.challenge.fgracia.calculator.auth.Credentials;
-import bct.coding.challenge.fgracia.calculator.dto.ItineraryDTO;
+import bct.coding.challenge.fgracia.calculator.dto.CityDTO;
 import bct.coding.challenge.fgracia.calculator.exception.APIAccessException;
 
 @Component
-public class ItineraryRepository {
+public class CityRepository {
 	
 	@Value("${itinerary.api.url}")
 	private String apiURL;
 	
 	private RestTemplate restTemplate = new RestTemplate();
 
-	public ItineraryDTO[] getItinerariesFrom(Credentials credentials, Integer city) throws APIAccessException{
-		ResponseEntity<ItineraryDTO[]> response;
+	public CityDTO[] getAllCities(Credentials credentials) throws APIAccessException{
+		ResponseEntity<CityDTO[]> response;
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setBearerAuth(credentials.getToken());
 			HttpEntity<String> entity = new HttpEntity<String>(headers);
-			String url = apiURL+"/itinerary?from="+city;
-			response = restTemplate.exchange(url, HttpMethod.GET,  entity, ItineraryDTO[].class);
+			response = restTemplate.exchange(apiURL+"/city", HttpMethod.GET,  entity, CityDTO[].class);
 		} catch (Exception e) {
 			throw new APIAccessException("Error accessing the data",e);
 		}

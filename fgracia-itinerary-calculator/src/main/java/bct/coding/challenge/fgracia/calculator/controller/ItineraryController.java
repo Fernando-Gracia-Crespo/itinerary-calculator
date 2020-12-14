@@ -21,16 +21,16 @@ public class ItineraryController {
 	@ApiOperation(value = "Method that returns the shortest path between two cities in terms of number of connections")
 	@GetMapping("/itinerary-calculator/{origin}/{destiny}/shorter-in-connections")
 	public Object calculateShortInConnections(
-			@ApiParam(name="origin", value = "City of origin", type = "string") @PathVariable String origin,
-			@ApiParam(name="destiny", value = "City of destination", type = "string") @PathVariable String destiny) throws Exception{
+			@ApiParam(name="origin", value = "City of origin", type = "integer") @PathVariable Integer origin,
+			@ApiParam(name="destiny", value = "City of destination", type = "integer") @PathVariable Integer destiny) throws Exception{
 		return itineraryService.getShorterRoute(origin, destiny, CalculateMode.CONNECTIONS);
 	}
 	
 	@ApiOperation(value = "Method that returns the shortest path between two cities in terms of time")
 	@GetMapping("/itinerary-calculator/{origin}/{destiny}/shorter-in-time")
 	public Object calculateShortInTime(
-			@ApiParam(name="origin", value = "City of origin", type = "string") @PathVariable String origin,
-			@ApiParam(name="destiny", value = "City of destination", type = "string") @PathVariable String destiny) {
+			@ApiParam(name="origin", value = "City of origin", type = "integer") @PathVariable Integer origin,
+			@ApiParam(name="destiny", value = "City of destination", type = "integer") @PathVariable Integer destiny) {
 		try {
 			return itineraryService.getShorterRoute(origin, destiny, CalculateMode.TIME);
 		} catch (Exception e) {

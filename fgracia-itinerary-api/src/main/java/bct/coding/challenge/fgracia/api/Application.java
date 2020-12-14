@@ -39,7 +39,7 @@ public class Application {
 			http.csrf().disable()
 				.addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
 				.authorizeRequests()
-				.antMatchers(HttpMethod.POST, "/user").permitAll()
+				.antMatchers(HttpMethod.POST, "/api/user").permitAll()
 				.antMatchers(AUTH_WHITELIST).permitAll()
 				.anyRequest().authenticated();
 		}
