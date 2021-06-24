@@ -2,6 +2,7 @@ package bct.coding.challenge.fgracia.api.controller;
 
 import java.util.Date;
 import java.util.List;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -18,9 +19,10 @@ import io.jsonwebtoken.SignatureAlgorithm;
 public class UserController {
 
 	@PostMapping("api/user")
-	public String login(@RequestParam("user") String username, @RequestParam("password") String pwd) throws Exception {
+	public String login(@RequestParam("user") String username, @RequestParam("password") String pwd) {
 		// We have two users, test/test and admin/1234, otherwise we return bad credentials
-		if(("test".equals(username) && "test".equals(pwd)) || ("admin".equals(username) && "1234".equals(pwd))) {
+		BiPredicate<String, String> pr = (u,p) -> ("test".equals(u) && "test".equals(p)) || ("admin".equals(u) && "1234".equals(p));
+		if(pr.test(username, pwd)) {
 			return getJWTToken(username);
 		}
 		throw new BadLoginException();

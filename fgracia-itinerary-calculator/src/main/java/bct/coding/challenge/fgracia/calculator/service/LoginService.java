@@ -18,9 +18,7 @@ public class LoginService {
 	private RestTemplate restTemplate = new RestTemplate();
 
 	public Credentials getUserToken(String user, String password) throws APIAccessException{
-		Credentials credentials = new Credentials();
-		credentials.setUser(user);
-		credentials.setPassword(password);
+		Credentials credentials = new Credentials(user,password);
 		ResponseEntity<String> response;
 		try {
 			response = restTemplate.postForEntity(apiURL+"/user?user="+user+"&password="+password, null, String.class);

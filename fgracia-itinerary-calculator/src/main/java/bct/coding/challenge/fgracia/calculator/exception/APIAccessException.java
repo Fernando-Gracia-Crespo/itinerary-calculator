@@ -1,6 +1,6 @@
 package bct.coding.challenge.fgracia.calculator.exception;
 
-public class APIAccessException extends Exception {
+public class APIAccessException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

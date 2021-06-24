@@ -2,7 +2,7 @@ package bct.coding.challenge.fgracia.calculator.exception;
 
 import bct.coding.challenge.fgracia.calculator.dto.ItineraryDTO;
 
-public class NoValidTimeException extends Exception {
+public class NoValidTimeException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 	

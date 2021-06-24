@@ -22,7 +22,7 @@ public class CityRepository {
 	
 	private RestTemplate restTemplate = new RestTemplate();
 
-	public CityDTO[] getAllCities(Credentials credentials) throws APIAccessException{
+	public CityDTO[] getAllCities(Credentials credentials) {
 		ResponseEntity<CityDTO[]> response;
 		try {
 			HttpHeaders headers = new HttpHeaders();
@@ -38,7 +38,7 @@ public class CityRepository {
 		return response.getBody();
 	}
 	
-	public boolean cityExists(Credentials credentials, Integer city) throws APIAccessException{
+	public boolean cityExists(Credentials credentials, Integer city) {
 		ResponseEntity<CityDTO> response = null;
 		try {
 			HttpHeaders headers = new HttpHeaders();

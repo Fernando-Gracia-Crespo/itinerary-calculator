@@ -1,6 +1,6 @@
 package bct.coding.challenge.fgracia.calculator.exception;
 
-public class NoReachableCityException extends Exception {
+public class NoReachableCityException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

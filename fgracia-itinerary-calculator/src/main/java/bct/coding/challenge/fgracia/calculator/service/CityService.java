@@ -28,7 +28,7 @@ public class CityService {
 	@Value("${itinerary.api.pass}")
 	private String apiPass;
 	
-	public List<CityDTO> getAllCities() throws Exception{
+	public List<CityDTO> getAllCities() {
 		Credentials credentials = loginService.getUserToken(apiUser, apiPass);
 		return Arrays.asList(cityRepository.getAllCities(credentials));
 	}	

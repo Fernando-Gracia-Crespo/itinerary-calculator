@@ -35,7 +35,7 @@ public class CityController {
 	@ApiOperation(value = "Method that returns one city")
 	@GetMapping("api/city/{city_id}")
 	public CityDTO getOne(
-			@ApiParam(name="city_id",value = "City", type = "integer") @PathVariable(name="city_id") Integer cityId) throws Exception{
+			@ApiParam(name="city_id",value = "City", type = "integer") @PathVariable(name="city_id") Integer cityId) {
 		Optional<City> city = cityRepository.findById(cityId);
 		if(!city.isPresent()) {
 			throw new ResourceNotFoundException("City not found: "+cityId);

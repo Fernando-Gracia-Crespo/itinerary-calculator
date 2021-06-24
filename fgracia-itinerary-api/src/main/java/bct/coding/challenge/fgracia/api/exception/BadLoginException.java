@@ -1,6 +1,6 @@
 package bct.coding.challenge.fgracia.api.exception;
 
-public class BadLoginException extends Exception {
+public class BadLoginException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

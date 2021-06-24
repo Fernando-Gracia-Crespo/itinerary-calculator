@@ -20,7 +20,7 @@ public class CityController {
 	
 	@ApiOperation(value = "Method that returns all the cities")
 	@GetMapping("/itinary-calculator/cities")
-	public List<CityDTO> getAllCities() throws Exception{
+	public List<CityDTO> getAllCities() {
 		return cityService.getAllCities();
 	}
 

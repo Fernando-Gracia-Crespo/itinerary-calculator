@@ -8,10 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import bct.coding.challenge.fgracia.calculator.dto.ItineraryDTO;
-import bct.coding.challenge.fgracia.calculator.exception.APIAccessException;
-import bct.coding.challenge.fgracia.calculator.exception.NoReachableCityException;
-import bct.coding.challenge.fgracia.calculator.exception.NoValidCityException;
-import bct.coding.challenge.fgracia.calculator.exception.NoValidTimeException;
 import bct.coding.challenge.fgracia.calculator.service.ItineraryService;
 import bct.coding.challenge.fgracia.calculator.service.ItineraryService.CalculateMode;
 import io.swagger.annotations.Api;
@@ -29,7 +25,7 @@ public class ItineraryController {
 	@GetMapping("/itinerary-calculator/{origin}/{destiny}/shorter-in-connections")
 	public List<ItineraryDTO> calculateShortInConnections(
 			@ApiParam(name="origin", value = "City of origin", type = "integer") @PathVariable Integer origin,
-			@ApiParam(name="destiny", value = "City of destination", type = "integer") @PathVariable Integer destiny) throws APIAccessException, NoValidCityException, NoValidTimeException, NoReachableCityException {
+			@ApiParam(name="destiny", value = "City of destination", type = "integer") @PathVariable Integer destiny) {
 		return itineraryService.getShorterRoute(origin, destiny, CalculateMode.CONNECTIONS);
 	}
 	
@@ -37,7 +33,7 @@ public class ItineraryController {
 	@GetMapping("/itinerary-calculator/{origin}/{destiny}/shorter-in-time")
 	public List<ItineraryDTO> calculateShortInTime(
 			@ApiParam(name="origin", value = "City of origin", type = "integer") @PathVariable Integer origin,
-			@ApiParam(name="destiny", value = "City of destination", type = "integer") @PathVariable Integer destiny) throws APIAccessException, NoValidCityException, NoValidTimeException, NoReachableCityException {
+			@ApiParam(name="destiny", value = "City of destination", type = "integer") @PathVariable Integer destiny) {
 		return itineraryService.getShorterRoute(origin, destiny, CalculateMode.TIME);
 	}
 	

@@ -10,6 +10,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import lombok.Data;
+
+@Data
 @Entity
 @Table(name="ITINERARY")
 public class Itinerary implements Serializable{
@@ -39,62 +42,6 @@ public class Itinerary implements Serializable{
 	
 	@Column(name="arrival_time")
 	private String arrivalTime;
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
-	/*public String getOriginCity() {
-		return originCity;
-	}
-
-	public void setOriginCity(String originCity) {
-		this.originCity = originCity;
-	}
-
-	public String getDestinyCity() {
-		return destinyCity;
-	}
-
-	public void setDestinyCity(String destinyCity) {
-		this.destinyCity = destinyCity;
-	}*/
-	
-	public City getOriginCity() {
-		return originCity;
-	}
-
-	public void setOriginCity(City originCity) {
-		this.originCity = originCity;
-	}
-
-	public City getDestinyCity() {
-		return destinyCity;
-	}
-
-	public void setDestinyCity(City destinyCity) {
-		this.destinyCity = destinyCity;
-	}
-
-	public String getDepartureTime() {
-		return departureTime;
-	}
-
-	public void setDepartureTime(String departureTime) {
-		this.departureTime = departureTime;
-	}
-
-	public String getArrivalTime() {
-		return arrivalTime;
-	}
-
-	public void setArrivalTime(String arrivalTime) {
-		this.arrivalTime = arrivalTime;
-	}
 
 	
 }
