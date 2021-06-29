@@ -3,7 +3,7 @@ HOW TO BUILD/RUN/USE THE APP:
 
 1.- Create the docker network executing:
 
-docket network create itinerary-network
+docker network create itinerary-network
 
 2.- Build and run project fgracia-itinerary-api, by going to the project base directory and executing the following commands
 
