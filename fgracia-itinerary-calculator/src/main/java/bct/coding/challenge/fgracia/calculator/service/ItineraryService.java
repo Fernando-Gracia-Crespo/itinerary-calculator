@@ -2,10 +2,14 @@ package bct.coding.challenge.fgracia.calculator.service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.Collectors;
 
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,7 +25,11 @@ import bct.coding.challenge.fgracia.calculator.repository.ItineraryRepository;
 
 @Service
 public class ItineraryService {
-	
+
+	public CityRepository getCityRepository() {
+		return cityRepository;
+	}
+
 	public enum CalculateMode { CONNECTIONS, TIME };
 	
 	@Autowired
@@ -38,107 +46,92 @@ public class ItineraryService {
 
 	@Value("${itinerary.api.pass}")
 	private String apiPass;
-	
-	public List<ItineraryDTO> getShorterRoute(Integer from, Integer to, CalculateMode mode) throws APIAccessException, NoValidCityException, NoValidTimeException, NoReachableCityException{
-		Credentials credentials = loginService.getUserToken(apiUser, apiPass);
-		if(!cityRepository.cityExists(credentials, from)) {
-			throw new NoValidCityException("City Id not valid: "+from);
+
+	private Supplier<Credentials> credentialsSupplier = () -> loginService.getUserToken(apiUser,apiPass);
+
+	public List<ItineraryDTO> getShorterRoute(Integer from, Integer to, CalculateMode mode){
+		Credentials credentials = credentialsSupplier.get();
+		parameterCheck(credentials,from,to);
+		Optional<Path> path = recursiveSearch(credentials, from, to, new ArrayList<Integer>(), mode);
+		return path.orElseThrow(
+				() -> new NoReachableCityException("The origin and destination cities are not connected")
+				).dtos;
+	}
+
+	private void parameterCheck(Credentials credentials, Integer from, Integer to){
+		IntConsumer c = i -> {
+			if (!cityRepository.cityExists(credentials, i)) {
+				throw new NoValidCityException("City Id not valid " + i);
+			}
+		};
+		c.accept(from);
+		c.accept(to);
+	}
+
+	private Optional<Path> recursiveSearch(Credentials credentials, Integer from, Integer to, List<Integer> visited, CalculateMode mode){
+		List<ItineraryDTO> itineraries = Arrays.asList(itineraryRepository.getItinerariesFrom(credentials, from));
+		return itineraries.stream()
+				.filter(i -> !visited.contains(i.getDestinyCity().getId()))
+				.map(i -> calculatePath(credentials,i,visited,from,to,mode))
+				.filter(p->p.weight!=Integer.MAX_VALUE)
+				.sorted()
+				.findFirst();
+	}
+
+	private Path calculatePath(Credentials credentials, ItineraryDTO itinerary, List<Integer> visited, Integer from, Integer to, CalculateMode mode){
+		if(itinerary.getDestinyCity().getId()==to){
+			return new Path(mode,itinerary);
+		} else {
+			List<Integer> newVisited = visited.stream().collect(Collectors.toList());
+			newVisited.add(from);
+			Optional<Path> path = recursiveSearch(credentials, itinerary.getDestinyCity().getId(), to, newVisited, mode);
+			if(path.isPresent() && path.get().weight!=Integer.MAX_VALUE){
+				path.get().addItineraryAtStart(itinerary);
+			}
+			// The constructor with no arguments give us a Path with weight=Integer.MAX_VALUE that will be discarded
+			return path.orElseGet(Path::new);
 		}
-		if(!cityRepository.cityExists(credentials, to)) {
-			throw new NoValidCityException("City Id not valid: "+to);
-		}
-		// We store the shortest found. If we detect the path we are going is already bigger (in terms of connections or time) we stop looking in this path. Initial value is MAX_VALUE to represent we did not found one yet
-		int shortest = Integer.MAX_VALUE;
-		// We store the cities already visited in the current path so we avoid loops. the cities are stored in the following pattern ##city1##city2##city3##
-		String visited = "##" + from + "##";
-		// Initial size is 0 as we have not yet process any itinerary
-		Path shortestPath = getParcialShorterRoute(credentials, from, to, visited, 0, shortest, mode);
-		if(shortestPath==null || shortestPath.dtos == null || shortestPath.dtos.isEmpty()) {
-			throw new NoReachableCityException("The origin and destination cities are not conected");
-		}
-		return shortestPath.dtos;
 	}
 	
-	private Path getParcialShorterRoute(Credentials credentials, Integer from, Integer to, String visited, int currentSize, int shortestFound, CalculateMode mode) throws APIAccessException, NoValidCityException, NoValidTimeException{
-		ItineraryDTO[] itineraries = itineraryRepository.getItinerariesFrom(credentials, from);
-		Path shortestFromHere = null;
-		int shortestFoundIncludingThisBranch = shortestFound;
-		for(ItineraryDTO itinerary:itineraries) {
-			// We get the size of this particular itinerary
-			int destSize = getSize(itinerary, mode);
-			// We check if we have arrived to the destination
-			if(itinerary.getDestinyCity().getId() == to) {
-				// we found the destination, we check if this path is the shortest found yet
-				int size = currentSize + destSize;
-				// We only consider this path if it is not bigger than the shortest found yet
-				if(size < shortestFound) {
-					// We have not yet discover any shorter path.
-					// we check if we have found another path from here (it can happen if the case AB + BC < AC is present)
-					if(shortestFromHere==null || shortestFromHere.weight > size) {
-						// The one we found is shorter than anyone found yet from this location
-						shortestFromHere = new Path();
-						shortestFromHere.dtos = new ArrayList<ItineraryDTO>();
-						shortestFromHere.dtos.add(itinerary);
-						shortestFromHere.weight = size;
-						// We set the new shortest found
-						shortestFoundIncludingThisBranch = size;
-					}
-				}
-			} else if(!visited.contains("##"+itinerary.getDestinyCity().getId()+"##")) {
-				// we have not yet visited this city on this path, no loop has been made, we get the shortest path from here
-				String newVisited = visited + itinerary.getDestinyCity().getId() + "##";
-				int newCurrentSize = currentSize + destSize;
-				// We check if we are still under the size of the shortest path found to this point  
-				if(newCurrentSize<shortestFound) {
-					Path shortestFromDestination = getParcialShorterRoute(credentials, itinerary.getDestinyCity().getId(), to, newVisited, newCurrentSize, shortestFoundIncludingThisBranch, mode);
-					// If shortestFromDestination == null it means the paths from here does not include the shortest found yet or the destination city is unreachable
-					if(shortestFromDestination!=null) {
-						// We have found the shortest found yet, we add this destination at the start of the list
-						if(shortestFromHere==null || shortestFromHere.weight > shortestFromDestination.weight) {
-							shortestFromDestination.dtos.add(0, itinerary);
-							shortestFromHere = shortestFromDestination;
-							shortestFoundIncludingThisBranch = shortestFromDestination.weight;
-						}
-					}
-				}
+	private class Path implements Comparable<Path>{
+		List<ItineraryDTO> dtos;
+		int weight;
+		CalculateMode mode;
+
+		ToIntFunction<ItineraryDTO> getSiZeFn =
+				i -> (i==null)?Integer.MAX_VALUE:(mode==CalculateMode.CONNECTIONS)?1:duration(i);
+
+		Path(CalculateMode mode, ItineraryDTO dto){
+			this.mode = mode;
+			dtos = new ArrayList<>();
+			dtos.add(dto);
+			weight = getSiZeFn.applyAsInt(dto);
+		}
+
+		public Path(){
+			dtos = new ArrayList<>();
+			weight = Integer.MAX_VALUE;
+		};
+
+		public void addItineraryAtStart(ItineraryDTO dto){
+			dtos.add(0,dto);
+			weight += getSiZeFn.applyAsInt(dto);
+		}
+
+		public int compareTo(Path other){
+			return this.weight - other.weight;
+		};
+
+		private int duration(ItineraryDTO dto){
+			try{
+				int arrival = LocalTime.parse(dto.getArrivalTime(),DateTimeFormatter.ISO_LOCAL_TIME).toSecondOfDay();
+				int departure = LocalTime.parse(dto.getDepartureTime(),DateTimeFormatter.ISO_LOCAL_TIME).toSecondOfDay();
+				return  arrival - departure;
+			} catch (DateTimeParseException e){
+				throw new NoValidTimeException(dto);
 			}
 		}
-		return shortestFromHere;
-	}
-	
-	private int getSize(ItineraryDTO itinerary, CalculateMode mode) throws NoValidTimeException{
-		// If there is any problem, we return MAX_VALUE so this itinerary will be discarded
-		if(itinerary == null) return Integer.MAX_VALUE;
-		switch(mode) {
-		case CONNECTIONS:
-			// In terms of number of connections, all itineraries are direct connections, so its size is 1
-			return 1;
-		case TIME:
-			// We calculate the temporal size in number of seconds
-			return durationInSeconds(itinerary);
-		default:
-			return Integer.MAX_VALUE;
-		}
-	}
-	
-	
-	
-	private int durationInSeconds(ItineraryDTO itinerary) throws NoValidTimeException{
-		// We parse the times with the format HH:mm:ss and we return its length in seconds 
-		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-		try {
-			Date departure = sdf.parse(itinerary.getDepartureTime());
-			Date arrival = sdf.parse(itinerary.getArrivalTime());
-			long lengthInMillis = arrival.getTime() - departure.getTime();
-			return (int) (lengthInMillis/1000l);
-		}catch(ParseException e){
-			throw new NoValidTimeException(itinerary);
-		}
-	}
-	
-	private class Path {
-		List<ItineraryDTO> dtos = new ArrayList<ItineraryDTO>();
-		int weight = Integer.MAX_VALUE;
+
 	}
 	
 	
